@@ -101,6 +101,7 @@ RUN bash -l -c "echo 'source /usr/local/rvm/scripts/rvm' >> ~/.bashrc"
 
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
+COPY dags/* ${AIRFLOW_USER_HOME}/dags/
 
 RUN chown -R airflow: ${AIRFLOW_USER_HOME}
 
