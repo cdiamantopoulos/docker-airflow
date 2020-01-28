@@ -73,6 +73,32 @@ RUN set -ex \
         /usr/share/doc \
         /usr/share/doc-base
 
+######## BEGINNING OF MY SHIT
+RUN apt-get update
+RUN apt-get install -yqq --no-install-recommends openssl curl vim gnupg2 git unzip wget procps
+RUN apt-get install dirmngr --install-recommends
+RUN pip install flask_bcrypt
+
+
+# install RVM, Ruby
+RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+RUN curl -sSL https://get.rvm.io | bash -s
+RUN bash -l -c ". /etc/profile.d/rvm.sh && rvm install 2.3.7"
+COPY . /app
+
+# Ruby gems
+RUN bash -l -c "gem install chromedriver-helper -v '1.2.0'"
+RUN bash -l -c "gem install capybara -v '2.13.0'"
+RUN bash -l -c "gem install selenium-webdriver -v '3.11.0'"
+
+# install chromedriver
+RUN apt-get install -yqq unzip
+RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux64.zip
+RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+RUN bash -l -c "echo 'source /usr/local/rvm/scripts/rvm' >> ~/.bashrc"
+
+######### END OF MY SHIT
+
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 
@@ -82,5 +108,6 @@ EXPOSE 8080 5555 8793
 
 USER airflow
 WORKDIR ${AIRFLOW_USER_HOME}
+RUN bash -l -c "echo 'source /usr/local/rvm/scripts/rvm' >> ~/.bashrc"
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["webserver"]
